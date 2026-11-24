@@ -57,6 +57,10 @@
   .menu::after { content:"›"; float:right; color:var(--soluk); }
   .bos { text-align:center; color:var(--soluk); padding:36px 16px; }
   .uyari { background:#fff4e0; border:1px solid #f0d49a; color:#6b4a00; border-radius:12px; padding:10px 12px; font-size:14px; margin-bottom:10px; }
+  .sayac { display:flex; align-items:center; gap:10px; margin-top:8px; }
+  .sayac span { color:var(--soluk); font-size:13px; }
+  .sayac b { min-width:22px; text-align:center; font-size:16px; }
+  .sayac .btn.kucuk { width:40px; padding:0; font-size:20px; line-height:1; }
   .gunler { display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; }
   .gunler button { flex:none; }
   #tost { position:fixed; left:12px; right:12px; bottom:calc(20px + env(safe-area-inset-bottom)); background:#1b2626; color:#fff; padding:12px 14px; border-radius:12px; font-size:14px; text-align:center; opacity:0; pointer-events:none; transition:opacity .2s; z-index:30; }
@@ -273,16 +277,28 @@ function cizAyar() {
   };
 }
 
+const EN_FAZLA_YATAK = 12;
+let yeniOdaYatak = 3;
+function sayac(n, veri) {
+  return '<div class="sayac"><span>Yatak sayısı</span><button class="btn kucuk ikincil" ' + veri + ' data-n="' + (n - 1) + '"' + (n <= 1 ? ' disabled' : '') + ' aria-label="Azalt">−</button><b>' + n + '</b><button class="btn kucuk ikincil" ' + veri + ' data-n="' + (n + 1) + '"' + (n >= EN_FAZLA_YATAK ? ' disabled' : '') + ' aria-label="Artır">+</button></div>';
+}
 function cizOdalar() {
-  let h = '<div class="kart"><label for="kat" style="margin-top:0">Kat</label><input type="text" id="kat" maxlength="30" placeholder="Örn. 3. Kat" autocomplete="off"><label for="oda">Oda adı</label><input type="text" id="oda" maxlength="30" placeholder="Örn. Dinlenme Odası 1" autocomplete="off"><button class="btn" id="ekle">Oda ekle</button></div><h2>Mevcut odalar</h2><div class="kart">';
+  let h = '<div class="kart"><label for="kat" style="margin-top:0">Kat</label><input type="text" id="kat" maxlength="30" placeholder="Örn. 3. Kat" autocomplete="off"><label for="oda">Oda adı</label><input type="text" id="oda" maxlength="30" placeholder="Örn. Dinlenme Odası 1" autocomplete="off"><div id="yeniSayac">' + sayac(yeniOdaYatak, 'data-yeni="1"') + '</div><button class="btn" id="ekle">Oda ekle</button></div><h2>Mevcut odalar</h2><div class="kart">';
   const l = durum ? sirala(durum.odalar) : [];
   if (!l.length) h += '<div class="bos" style="padding:16px">Henüz oda yok.</div>';
-  l.forEach(o => { h += '<div class="satir"><div><b>' + esc(o.oda) + '</b><small>' + esc(o.kat) + '</small></div><button class="btn kucuk tehlike" data-id="' + esc(o.id) + '">Sil</button></div>'; });
+  l.forEach(o => { h += '<div class="satir"><div><b>' + esc(o.oda) + '</b><small>' + esc(o.kat) + '</small>' + sayac(o.yataklar.length, 'data-yid="' + esc(o.id) + '"') + '</div><button class="btn kucuk tehlike" data-id="' + esc(o.id) + '">Sil</button></div>'; });
   $('icerik').innerHTML = h + '</div>';
+  const yeniBagla = () => document.querySelectorAll('[data-yeni]').forEach(b => b.onclick = () => {
+    yeniOdaYatak = +b.dataset.n; $('yeniSayac').innerHTML = sayac(yeniOdaYatak, 'data-yeni="1"'); yeniBagla();
+  });
+  yeniBagla();
+  document.querySelectorAll('[data-yid]').forEach(b => b.onclick = async () => {
+    if (await yap('odaYatak', { odaId: b.dataset.yid, yatak: +b.dataset.n })) ciz();
+  });
   $('ekle').onclick = async () => {
     const kat = $('kat').value.trim(), oda = $('oda').value.trim();
     if (!kat || !oda) return bildir('Kat ve oda adını yazın.');
-    if (await yap('odaEkle', { kat: kat, oda: oda })) { bildir('Oda eklendi.'); ciz(); $('kat').value = kat; }
+    if (await yap('odaEkle', { kat: kat, oda: oda, yatak: yeniOdaYatak })) { bildir('Oda eklendi.'); ciz(); $('kat').value = kat; }
   };
   document.querySelectorAll('[data-id]').forEach(b => b.onclick = async () => {
     const o = durum.odalar.find(x => x.id === b.dataset.id);
