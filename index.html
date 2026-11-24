@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f6e6e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dinlenme">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<title>Dinlenme Odaları</title>
+<style>
+  :root { --ana:#0f6e6e; --ana-koyu:#0a5252; --zemin:#f2f5f5; --kart:#fff; --yazi:#1b2626; --soluk:#6b7b7b; --cizgi:#dbe3e3; --hata:#b3261e; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; height:100%; background:var(--zemin); color:var(--yazi); font:16px/1.4 system-ui, -apple-system, Roboto, sans-serif; }
+  header { position:sticky; top:0; z-index:5; background:var(--ana); color:#fff; padding:14px 12px; padding-top:calc(14px + env(safe-area-inset-top)); display:flex; align-items:center; gap:8px; }
+  header h1 { font-size:18px; margin:0; flex:1; font-weight:600; }
+  header small { display:block; font-weight:400; font-size:12px; opacity:.85; }
+  header button { background:rgba(255,255,255,.16); color:#fff; border:0; border-radius:10px; min-width:44px; height:44px; font-size:15px; padding:0 12px; }
+  main { padding:12px; max-width:560px; margin:0 auto; padding-bottom:calc(40px + env(safe-area-inset-bottom)); }
+  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--soluk); margin:18px 4px 8px; }
+  .kart { background:var(--kart); border:1px solid var(--cizgi); border-radius:14px; padding:12px; margin-bottom:10px; }
+  .oda-ust { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .oda-ust b { font-size:16px; }
+  .rozet { font-size:12px; padding:3px 9px; border-radius:99px; background:#e8eeee; color:var(--soluk); white-space:nowrap; }
+  .rozet.K { background:#f1e6f7; color:#6a2c8f; }
+  .rozet.E { background:#e2edf9; color:#1f4f8a; }
+  .yataklar { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .yatak { min-height:74px; border-radius:12px; border:1.5px dashed #b9c7c7; background:#fafcfc; color:var(--soluk); font:inherit; font-size:14px; padding:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; overflow:hidden; }
+  .yatak small { font-size:11px; opacity:.8; }
+  .yatak span { max-width:100%; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; word-break:break-word; }
+  .yatak.dolu { border-style:solid; border-color:#cfd8d8; background:#e9eeee; color:var(--yazi); font-weight:600; }
+  .yatak.benim { border-style:solid; border-color:var(--ana); background:var(--ana); color:#fff; font-weight:600; }
+  .yatak.kapali { opacity:.45; }
+  .yatak:active { transform:scale(.97); }
+  label { display:block; font-size:13px; color:var(--soluk); margin:12px 2px 6px; }
+  input[type=text], input[type=password] { width:100%; height:48px; border:1.5px solid var(--cizgi); border-radius:12px; padding:0 14px; font:inherit; background:#fff; color:var(--yazi); }
+  input:focus { outline:none; border-color:var(--ana); }
+  .ikili { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .sec { height:48px; border:1.5px solid var(--cizgi); border-radius:12px; background:#fff; font:inherit; color:var(--yazi); }
+  .sec.aktif { border-color:var(--ana); background:var(--ana); color:#fff; font-weight:600; }
+  .btn { width:100%; height:50px; border:0; border-radius:12px; background:var(--ana); color:#fff; font:inherit; font-weight:600; margin-top:16px; }
+  .btn.ikincil { background:#e3eaea; color:var(--yazi); }
+  .btn.kucuk { width:auto; height:38px; padding:0 14px; margin:0; font-size:14px; font-weight:500; }
+  .btn.tehlike { background:#fbe9e7; color:var(--hata); }
+  .btn:disabled { opacity:.5; }
+  .satir { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--cizgi); }
+  .satir:last-child { border-bottom:0; }
+  .satir > div { flex:1; min-width:0; }
+  .satir small { color:var(--soluk); display:block; }
+  .menu { display:block; width:100%; text-align:left; background:none; border:0; font:inherit; color:var(--yazi); padding:14px 2px; border-bottom:1px solid var(--cizgi); }
+  .menu:last-child { border-bottom:0; }
+  .menu::after { content:"›"; float:right; color:var(--soluk); }
+  .bos { text-align:center; color:var(--soluk); padding:36px 16px; }
+  .uyari { background:#fff4e0; border:1px solid #f0d49a; color:#6b4a00; border-radius:12px; padding:10px 12px; font-size:14px; margin-bottom:10px; }
+  .gunler { display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; }
+  .gunler button { flex:none; }
+  #tost { position:fixed; left:12px; right:12px; bottom:calc(20px + env(safe-area-inset-bottom)); background:#1b2626; color:#fff; padding:12px 14px; border-radius:12px; font-size:14px; text-align:center; opacity:0; pointer-events:none; transition:opacity .2s; z-index:30; }
+  #tost.gor { opacity:.96; }
+  #perde { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:flex-end; justify-content:center; z-index:20; }
+  #perde.gor { display:flex; }
+  #kutu { background:#fff; width:100%; max-width:560px; border-radius:18px 18px 0 0; padding:20px 16px calc(18px + env(safe-area-inset-bottom)); }
+  #kutu p { margin:0 0 6px; font-size:16px; }
+</style>
+</head>
+<body>
+<header>
+  <button id="geriBtn" style="display:none" aria-label="Geri">‹</button>
+  <h1><span id="baslik">Dinlenme Odaları</span><small id="alt"></small></h1>
+  <button id="yenileBtn" aria-label="Yenile">⟳</button>
+  <button id="ayarBtn" aria-label="Ayarlar">☰</button>
+</header>
+<main id="icerik"></main>
+<div id="perde"><div id="kutu"><p id="soru"></p><div class="ikili"><button class="btn ikincil" id="hayir">Vazgeç</button><button class="btn" id="evet">Evet</button></div></div></div>
+<div id="tost"></div>
+
+<script src="config.js"></script>
+<script>
+"use strict";
+// ---- kalıcı bilgiler ----
+const depo = {
+  al(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  yaz(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+let cihaz = depo.al('cihaz');
+if (!cihaz) {
+  cihaz = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  depo.yaz('cihaz', cihaz);
+}
+let profil = null;
+try { profil = JSON.parse(depo.al('profil') || 'null'); } catch (e) {}
+
+let durum = null;      // sunucudan gelen son durum
+let ekran = 'ana';     // ana | profil | ayar | odalar | kullanicilar | gecmis
+let mesgul = false;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const cinsAd = c => c === 'K' ? 'Kadın' : c === 'E' ? 'Erkek' : '';
+const tarih = n => n && n.length === 8 ? n.slice(6) + '.' + n.slice(4, 6) + '.' + n.slice(0, 4) : '';
+
+// ---- sunucu ----
+async function api(islem, ek) {
+  if (!window.SUNUCU_ADRESI) throw new Error('Sunucu adresi ayarlanmamış (config.js).');
+  const istek = Object.assign({ islem: islem, cihaz: cihaz }, ek || {});
+  const ctl = new AbortController();
+  const zaman = setTimeout(() => ctl.abort(), 25000);
+  let yanit;
+  try {
+    yanit = await fetch(window.SUNUCU_ADRESI + '?p=' + encodeURIComponent(JSON.stringify(istek)), { signal: ctl.signal, redirect: 'follow' });
+  } catch (e) {
+    throw new Error('Bağlantı kurulamadı. İnternetinizi kontrol edin.');
+  } finally {
+    clearTimeout(zaman);
+  }
+  let j;
+  try { j = await yanit.json(); } catch (e) { throw new Error('Sunucu yanıtı okunamadı.'); }
+  if (!j.ok) throw new Error(j.hata || 'İşlem yapılamadı.');
+  return j;
+}
+// İşlemi yapar, hata olursa bildirir; başarılıysa sonucu döndürür
+async function yap(islem, ek) {
+  if (mesgul) return null;
+  mesgul = true;
+  $('yenileBtn').textContent = '…';
+  try {
+    const j = await api(islem, ek);
+    if (j.odalar) durum = j;
+    return j;
+  } catch (e) {
+    bildir(e.message);
+    return null;
+  } finally {
+    mesgul = false;
+    $('yenileBtn').textContent = '⟳';
+  }
+}
+
+// ---- küçük arayüz parçaları ----
+let tostZ;
+function bildir(m) {
+  const t = $('tost'); t.textContent = m; t.classList.add('gor');
+  clearTimeout(tostZ); tostZ = setTimeout(() => t.classList.remove('gor'), 3200);
+}
+function sor(m, evetYazi) {
+  return new Promise(coz => {
+    $('soru').textContent = m; $('evet').textContent = evetYazi || 'Evet';
+    $('perde').classList.add('gor');
+    const kapat = v => { $('perde').classList.remove('gor'); $('evet').onclick = $('hayir').onclick = null; coz(v); };
+    $('evet').onclick = () => kapat(true);
+    $('hayir').onclick = () => kapat(false);
+  });
+}
+function git(e) { ekran = e; ciz(); window.scrollTo(0, 0); }
+window.geri = function () {
+  if ($('perde').classList.contains('gor')) { $('hayir').click(); return true; }
+  if (ekran === 'ana' || (ekran === 'profil' && !profil)) return false;
+  git(ekran === 'ayar' ? 'ana' : (ekran === 'profil' ? 'ayar' : (profil ? 'ayar' : 'profil')));
+  return true;
+};
+
+// ---- ekranlar ----
+function ciz() {
+  if (!profil) ekran = 'profil';
+  const basliklar = { ana: 'Dinlenme Odaları', profil: 'Bilgileriniz', ayar: 'Menü', odalar: 'Odaları düzenle', kullanicilar: 'Yöneticiler', gecmis: 'Geçmiş kayıtlar' };
+  $('baslik').textContent = basliklar[ekran];
+  $('alt').textContent = ekran === 'ana' && profil ? profil.isim + (durum ? ' · ' + tarih(durum.nobet) + ' nöbeti' : '') : '';
+  $('geriBtn').style.display = (ekran === 'ana' || (ekran === 'profil' && !profil)) ? 'none' : '';
+  $('yenileBtn').style.display = $('ayarBtn').style.display = ekran === 'ana' ? '' : 'none';
+  ({ ana: cizAna, profil: cizProfil, ayar: cizAyar, odalar: cizOdalar, kullanicilar: cizKullanicilar, gecmis: cizGecmis })[ekran]();
+}
+
+function sirala(odalar) {
+  const k = (a, b) => a.localeCompare(b, 'tr', { numeric: true });
+  return odalar.slice().sort((a, b) => k(a.kat, b.kat) || k(a.oda, b.oda));
+}
+
+function cizAna() {
+  const el = $('icerik');
+  if (!window.SUNUCU_ADRESI) { el.innerHTML = '<div class="uyari">Sunucu adresi ayarlanmamış. config.js dosyasına Apps Script adresini yazın.</div>'; return; }
+  if (!durum) { el.innerHTML = '<div class="bos">Yükleniyor…</div>'; return; }
+  if (!durum.odalar.length) {
+    el.innerHTML = '<div class="bos">Henüz oda eklenmemiş.<br>' + (durum.yonetici ? 'Menü › Odaları düzenle bölümünden ekleyebilirsiniz.' : 'Yöneticinin oda eklemesi gerekiyor.') + '</div>';
+    return;
+  }
+  const benimVar = durum.odalar.some(o => o.yataklar.some(y => y && y.benim));
+  let h = '', sonKat = null;
+  sirala(durum.odalar).forEach(o => {
+    if (o.kat !== sonKat) { h += '<h2>' + esc(o.kat) + '</h2>'; sonKat = o.kat; }
+    const dolu = o.yataklar.filter(y => y).length;
+    const uygunDegil = o.cinsiyet && o.cinsiyet !== profil.cinsiyet;
+    const rozet = o.cinsiyet ? '<span class="rozet ' + o.cinsiyet + '">' + cinsAd(o.cinsiyet) + ' odası · ' + dolu + '/' + o.yataklar.length + '</span>' : '<span class="rozet">Boş</span>';
+    h += '<div class="kart"><div class="oda-ust"><b>' + esc(o.oda) + '</b>' + rozet + '</div><div class="yataklar">';
+    o.yataklar.forEach((y, i) => {
+      const veri = ' data-oda="' + esc(o.id) + '" data-yatak="' + (i + 1) + '"';
+      if (y && y.benim) h += '<button class="yatak benim"' + veri + '><span>' + esc(y.isim) + '</span><small>Bırakmak için dokunun</small></button>';
+      else if (y) h += '<button class="yatak dolu"' + veri + '><span>' + esc(y.isim) + '</span></button>';
+      else if (uygunDegil) h += '<button class="yatak kapali"' + veri + '><span>Yatak ' + (i + 1) + '</span><small>Uygun değil</small></button>';
+      else h += '<button class="yatak"' + veri + '><span>Yatak ' + (i + 1) + '</span><small>' + (benimVar ? 'Boş' : 'Boş · dokunun') + '</small></button>';
+    });
+    h += '</div></div>';
+  });
+  el.innerHTML = h;
+  el.querySelectorAll('.yatak').forEach(b => b.onclick = () => yatakDokun(b.dataset.oda, +b.dataset.yatak));
+}
+
+async function yatakDokun(odaId, no) {
+  const o = durum.odalar.find(x => x.id === odaId); if (!o) return;
+  const y = o.yataklar[no - 1];
+  const yer = o.kat + ' · ' + o.oda + ', Yatak ' + no;
+  if (y && y.benim) {
+    if (await sor(yer + ' yatağını bırakmak istiyor musunuz?', 'Bırak')) { await yap('birak', { odaId: odaId, yatak: no }); ciz(); }
+  } else if (y) {
+    if (!durum.yonetici) return;
+    if (await sor(y.isim + ' adına ayrılmış yatak boşaltılsın mı? (' + yer + ')', 'Boşalt')) { await yap('birak', { odaId: odaId, yatak: no }); ciz(); }
+  } else {
+    if (o.cinsiyet && o.cinsiyet !== profil.cinsiyet) return bildir('Bu odayı şu an ' + cinsAd(o.cinsiyet).toLowerCase() + ' hekimler kullanıyor.');
+    if (durum.odalar.some(x => x.yataklar.some(z => z && z.benim))) return bildir('Zaten bir yatağınız var. Önce onu bırakın.');
+    if (await sor(yer + ' sizin adınıza ayrılsın mı?', 'Ayır')) {
+      const j = await yap('ayir', { odaId: odaId, yatak: no, isim: profil.isim, cinsiyet: profil.cinsiyet });
+      if (!j) await yenile(true);
+      ciz();
+    }
+  }
+}
+
+function cizProfil() {
+  let secili = profil ? profil.cinsiyet : '';
+  $('icerik').innerHTML =
+    '<div class="kart">' + (profil ? '' : '<p style="margin:2px 2px 6px">Hoş geldiniz. Yatak ayırabilmek için adınızı ve cinsiyetinizi girin. Aynı odayı yalnızca aynı cinsiyetten hekimler kullanabilir.</p>') +
+    '<label for="isim">Ad Soyad</label><input type="text" id="isim" maxlength="40" autocomplete="off" value="' + esc(profil ? profil.isim : '') + '">' +
+    '<label>Cinsiyet</label><div class="ikili"><button class="sec" data-c="K">Kadın</button><button class="sec" data-c="E">Erkek</button></div>' +
+    '<button class="btn" id="kaydet">Kaydet</button></div>';
+  const isaretle = () => document.querySelectorAll('.sec').forEach(b => b.classList.toggle('aktif', b.dataset.c === secili));
+  document.querySelectorAll('.sec').forEach(b => b.onclick = () => { secili = b.dataset.c; isaretle(); });
+  isaretle();
+  $('kaydet').onclick = async () => {
+    const isim = $('isim').value.trim();
+    if (!isim) return bildir('Adınızı yazın.');
+    if (!secili) return bildir('Cinsiyet seçin.');
+    const j = await yap('profil', { isim: isim, cinsiyet: secili });
+    if (!j) return;
+    profil = { isim: isim, cinsiyet: secili };
+    depo.yaz('profil', JSON.stringify(profil));
+    git('ana');
+  };
+  const kurulu = window.navigator.standalone || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  if (!profil && !kurulu) {
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    $('icerik').insertAdjacentHTML('afterbegin', '<div class="uyari"><b>Önce ana ekrana ekleyin.</b> ' + (ios ? 'Safari’de Paylaş düğmesine, sonra “Ana Ekrana Ekle”ye dokunun' : 'Chrome’da ⋮ menüsünden “Ana ekrana ekle”yi seçin') + ' ve uygulamayı oradaki simgeden açıp adınızı orada kaydedin.</div>');
+  }
+}
+
+function cizAyar() {
+  const y = durum && durum.yonetici;
+  let h = '<div class="kart"><div class="satir"><div><b>' + esc(profil.isim) + '</b><small>' + cinsAd(profil.cinsiyet) + (y ? ' · Yönetici' : '') + '</small></div><button class="btn kucuk ikincil" id="duzenle">Düzenle</button></div></div>';
+  if (y) {
+    h += '<h2>Yönetim</h2><div class="kart" style="padding:0 12px"><button class="menu" data-e="odalar">Odaları düzenle</button><button class="menu" data-e="kullanicilar">Yönetici yetkileri</button><button class="menu" data-e="gecmis">Geçmiş kayıtlar</button></div>';
+  } else {
+    h += '<h2>Yönetici girişi</h2><div class="kart"><label for="pin" style="margin-top:0">Kurucu PIN</label><input type="password" id="pin" inputmode="numeric" autocomplete="off"><button class="btn" id="pinBtn">Giriş yap</button><p style="font-size:13px;color:var(--soluk);margin:10px 2px 0">PIN yalnızca ilk yönetici içindir. Diğer hekimlere yetkiyi bir yönetici bu menüden verir.</p></div>';
+  }
+  h += '<p style="font-size:13px;color:var(--soluk);text-align:center;margin-top:18px">Kayıtlar her sabah ' + String(durum ? durum.sifirlama : 9).padStart(2, '0') + ':00’da sıfırlanır.</p>';
+  $('icerik').innerHTML = h;
+  $('duzenle').onclick = () => git('profil');
+  document.querySelectorAll('.menu').forEach(b => b.onclick = () => git(b.dataset.e));
+  if ($('pinBtn')) $('pinBtn').onclick = async () => {
+    const j = await yap('pin', { pin: $('pin').value.trim(), isim: profil.isim, cinsiyet: profil.cinsiyet });
+    if (j) { bildir('Yönetici yetkisi tanımlandı.'); ciz(); }
+  };
+}
+
+function cizOdalar() {
+  let h = '<div class="kart"><label for="kat" style="margin-top:0">Kat</label><input type="text" id="kat" maxlength="30" placeholder="Örn. 3. Kat" autocomplete="off"><label for="oda">Oda adı</label><input type="text" id="oda" maxlength="30" placeholder="Örn. Dinlenme Odası 1" autocomplete="off"><button class="btn" id="ekle">Oda ekle</button></div><h2>Mevcut odalar</h2><div class="kart">';
+  const l = durum ? sirala(durum.odalar) : [];
+  if (!l.length) h += '<div class="bos" style="padding:16px">Henüz oda yok.</div>';
+  l.forEach(o => { h += '<div class="satir"><div><b>' + esc(o.oda) + '</b><small>' + esc(o.kat) + '</small></div><button class="btn kucuk tehlike" data-id="' + esc(o.id) + '">Sil</button></div>'; });
+  $('icerik').innerHTML = h + '</div>';
+  $('ekle').onclick = async () => {
+    const kat = $('kat').value.trim(), oda = $('oda').value.trim();
+    if (!kat || !oda) return bildir('Kat ve oda adını yazın.');
+    if (await yap('odaEkle', { kat: kat, oda: oda })) { bildir('Oda eklendi.'); ciz(); $('kat').value = kat; }
+  };
+  document.querySelectorAll('[data-id]').forEach(b => b.onclick = async () => {
+    const o = durum.odalar.find(x => x.id === b.dataset.id);
+    if (await sor(o.kat + ' · ' + o.oda + ' silinsin mi? İçindeki yataklar da boşaltılır.', 'Sil')) { await yap('odaSil', { odaId: o.id }); ciz(); }
+  });
+}
+
+async function cizKullanicilar(veri) {
+  const el = $('icerik');
+  if (!veri) { el.innerHTML = '<div class="bos">Yükleniyor…</div>'; veri = await yap('kullanicilar'); if (ekran !== 'kullanicilar') return; if (!veri) { el.innerHTML = '<div class="bos">Liste alınamadı.</div>'; return; } }
+  let h = '<div class="uyari">Uygulamaya adını kaydetmiş hekimler listelenir. Yönetici yapılan kişi oda düzenleyebilir, yatak boşaltabilir, geçmişi görebilir ve başkalarına yetki verebilir.</div><div class="kart">';
+  veri.kullanicilar.slice().sort((a, b) => a.isim.localeCompare(b.isim, 'tr')).forEach(k => {
+    h += '<div class="satir"><div><b>' + esc(k.isim) + '</b><small>' + cinsAd(k.cinsiyet) + (k.yonetici ? ' · Yönetici' : '') + (k.ben ? ' · Siz' : '') + '</small></div>' +
+      (k.ben ? '' : '<button class="btn kucuk ' + (k.yonetici ? 'tehlike' : 'ikincil') + '" data-kid="' + esc(k.kid) + '" data-ver="' + (k.yonetici ? '' : '1') + '">' + (k.yonetici ? 'Yetkiyi kaldır' : 'Yönetici yap') + '</button>') + '</div>';
+  });
+  el.innerHTML = h + '</div>';
+  el.querySelectorAll('[data-kid]').forEach(b => b.onclick = async () => {
+    const k = veri.kullanicilar.find(x => x.kid === b.dataset.kid), ver = !!b.dataset.ver;
+    if (!await sor(k.isim + (ver ? ' yönetici yapılsın mı?' : ' için yönetici yetkisi kaldırılsın mı?'), ver ? 'Yönetici yap' : 'Kaldır')) return;
+    const j = await yap('yetki', { kid: k.kid, ver: ver });
+    if (j && ekran === 'kullanicilar') cizKullanicilar(j);
+  });
+}
+
+async function cizGecmis(veri) {
+  const el = $('icerik');
+  if (!veri) { el.innerHTML = '<div class="bos">Yükleniyor…</div>'; veri = await yap('gecmis'); if (ekran !== 'gecmis') return; if (!veri) { el.innerHTML = '<div class="bos">Kayıtlar alınamadı.</div>'; return; } }
+  if (!veri.gunler.length) { el.innerHTML = '<div class="bos">Henüz kayıt yok.</div>'; return; }
+  let h = '<div class="gunler">';
+  veri.gunler.forEach(g => { h += '<button class="btn kucuk ' + (g === veri.nobet ? '' : 'ikincil') + '" data-g="' + esc(g) + '">' + tarih(g) + '</button>'; });
+  h += '</div><h2>' + tarih(veri.nobet) + ' nöbeti · ' + veri.kayitlar.length + ' kayıt</h2><div class="kart">';
+  veri.kayitlar.forEach(k => {
+    h += '<div class="satir"><div><b>' + esc(k.isim) + '</b> <span class="rozet ' + esc(k.cinsiyet) + '">' + cinsAd(k.cinsiyet) + '</span><small>' + esc(k.kat) + ' · ' + esc(k.oda) + ' · Yatak ' + esc(k.yatak) + '</small><small>Ayırma: ' + esc(k.ayirma) + (k.birakma ? ' · Bırakma: ' + esc(k.birakma) : ' · Sabaha kadar') + '</small></div></div>';
+  });
+  el.innerHTML = h + '</div>';
+  el.querySelectorAll('[data-g]').forEach(b => b.onclick = async () => { const j = await yap('gecmis', { nobet: b.dataset.g }); if (j && ekran === 'gecmis') cizGecmis(j); });
+  const s = el.querySelector('.gunler .btn:not(.ikincil)'); if (s && s.scrollIntoView) s.scrollIntoView({ inline: 'center', block: 'nearest' });
+}
+
+// ---- yenileme ----
+async function yenile(sessiz) {
+  if (!profil || mesgul || !window.SUNUCU_ADRESI) return;
+  if (sessiz) {
+    try { durum = await api('durum'); } catch (e) { return; }
+  } else {
+    await yap('durum');
+  }
+  if (ekran === 'ana' && !$('perde').classList.contains('gor')) ciz();
+}
+$('yenileBtn').onclick = () => yenile(false);
+$('ayarBtn').onclick = () => git('ayar');
+$('geriBtn').onclick = () => window.geri();
+setInterval(() => { if (!document.hidden && ekran === 'ana') yenile(true); }, 8000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) yenile(true); });
+
+ciz();
+if (profil) {
+  // Profil sunucuda da kayıtlı olsun (yönetici listesinde görünmek için), sonra durumu getir
+  yap('profil', { isim: profil.isim, cinsiyet: profil.cinsiyet }).then(j => { if (!j) return yenile(false); ciz(); });
+}
+</script>
+</body>
+</html>
